@@ -1,6 +1,7 @@
 import csv
 from geopy.geocoders import Nominatim
-
+from concurrent.futures import ProcessPoolExecutor
+import os
 
 def get_lat_long_from_pincode(pincode):
     geolocator = Nominatim(user_agent="geo_locator")
@@ -17,18 +18,17 @@ def get_lat_long_from_pincode(pincode):
         print(f"Error: {e}")
         return None
 
+def process_file(input_file, output_file):
+    print(f"Processing {input_file}...")
 
-def update_csv_with_lat_long(input_csv, output_csv):
-    iterator = 0
-    with open(input_csv, 'r') as infile, open(output_csv, 'w', newline='') as outfile:
+    with open(input_file, 'r') as infile, open(output_file, 'w', newline='') as outfile:
         reader = csv.DictReader(infile)
         fieldnames = reader.fieldnames + ['latitude', 'longitude']
         writer = csv.DictWriter(outfile, fieldnames=fieldnames)
         writer.writeheader()
 
         for row in reader:
-            print(iterator)
-            iterator += 1
+            print("are you sure you want to")
             pincode = row['pincode']
             lat_long = get_lat_long_from_pincode(pincode)
             if lat_long:
@@ -38,9 +38,13 @@ def update_csv_with_lat_long(input_csv, output_csv):
                 # If location is not found, still write the original row
                 writer.writerow(row)
 
+def update_csv_with_lat_long_single_file(input_file, output_folder):
+    output_file = os.path.join(output_folder, filename)
+    process_file(input_file, output_file)
 
-# Example usage
-input_csv_file = '/Users/archaudhary/Documents/projects/py_snippets/all_india_PO_list.csv'
-output_csv_file = 'output_file_with_lat_long.csv'
+# Example usage with a single file
+filename = 'output_file_14.csv'
+input_file = f'/Users/archaudhary/Documents/projects/py_snippets/spliteed_input/{filename}'
+output_folder = '/Users/archaudhary/Documents/projects/py_snippets/processed_folder'
 
-update_csv_with_lat_long(input_csv_file, output_csv_file)
+update_csv_with_lat_long_single_file(input_file, output_folder)
